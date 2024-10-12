@@ -3,25 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tesseract.js Example</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Scan Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Make sure the content is vertically centered */
+        }
+        .container {
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #444;
+            padding: 10px 0;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+        input, button {
+            display: block;
+            margin: 20px auto;
+        }
+        #result, #loading {
+            margin-top: 20px;
+        }
+        canvas {
+            display: none; /* Hide canvas */
+        }
+    </style>
 </head>
 <body>
-    <h1>Tesseract.js OCR Example</h1>
+    <div class="container">
+        <h1>Scan your receipt</h1>
+        <nav>
+            <a href="main.html">Home</a>
+            <a href="scan.html">Scan</a> <!-- Added link to the scan page -->
+            <a href="#">About</a>
+            <a href="#">Services</a>
+            <a href="#">Contact</a>
+        </nav>
+
+        <!-- Image Upload Form -->
+        <input type="file" id="imageInput" accept="image/*">
+        <button id="start-btn">Start Scanning</button>
+
+        <!-- Display preprocessed image and result -->
+        <canvas id="canvas"></canvas>
+        <p id="result">OCR Result will appear here...</p>
+        <p id="loading">Processing, please wait...</p>
+    </div>
 
     <!-- Import Tesseract.js via CDN -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.4/dist/tesseract.min.js"></script>
-
-    <script>
-        // Example usage of Tesseract.js
-        Tesseract.recognize(
-            'path_to_image',    // Replace with the image URL or local image path
-            'eng',              // Language code for English
-            {
-                logger: m => console.log(m),  // Optional: logs the OCR progress
-            }
-        ).then(({ data: { text } }) => {
-            console.log(text);  // Outputs the extracted text
-        });
-    </script>
+    <!-- Link to External JavaScript File -->
+    <script src="ocr.js"></script>
 </body>
 </html>
+
+
