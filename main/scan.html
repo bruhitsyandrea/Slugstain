@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tesseract.js Example</title>
+</head>
+<body>
+    <h1>Tesseract.js OCR Example</h1>
+
+    <!-- Import Tesseract.js via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.4/dist/tesseract.min.js"></script>
+
+    <script>
+        // Example usage of Tesseract.js
+        Tesseract.recognize(
+            'path_to_image',    // Replace with the image URL or local image path
+            'eng',              // Language code for English
+            {
+                logger: m => console.log(m),  // Optional: logs the OCR progress
+            }
+        ).then(({ data: { text } }) => {
+            console.log(text);  // Outputs the extracted text
+        });
+    </script>
+</body>
+</html>
