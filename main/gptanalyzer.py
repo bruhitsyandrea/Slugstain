@@ -6,25 +6,26 @@ import os
 app = Flask(__name__)
 
 # Set your OpenAI API key
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
+openai.api_key = ""
 # Define a route to handle the item analysis requests
 @app.route('/analyze', methods=['POST'])
+#@app.route('/analyze', methods=['POST'])
 def analyze_item():
-    # Get the item from the request data
     data = request.json
     item = data.get('item', '')
 
-    # Use OpenAI to analyze the item
     try:
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": item}]
         )
-        result = response['choices'][0]['message']['content']
+        result = response.choices[0].message.content
         return jsonify({'result': result})
-    except Exception as e:
+    except openai.error.OpenAIError as e:  # Handle specific OpenAI errors
         return jsonify({'error': str(e)}), 500
+    except Exception as e:  # Handle other exceptions
+        return jsonify({'error': 'An error occurred: ' + str(e)}), 500
+
 
 # Serve your HTML files
 @app.route('/')
