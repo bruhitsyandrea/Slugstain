@@ -126,31 +126,48 @@ function doOCR() {
 function analyzeOCRResult() {
     const item = document.getElementById('result').textContent;
 
-    if (!item) {
+    // Check if there's any OCR result to analyze
+    if (!item || item.trim() === "") {
         console.error("No OCR result to analyze.");
+        alert("No OCR result found. Please scan an image first.");
         return;
     }
+
+    console.log("Sending OCR result to Flask backend for analysis:", item);
 
     fetch('/analyze', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ item: item }),
+        body: JSON.stringify({ item: item }),  // Send the OCR result as JSON
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();  // Parse JSON response
+    })
     .then(data => {
         // Display the GPT analysis result
-        document.getElementById('ai-result').textContent = 'GPT Analysis: ' + data.result;
+        if (data.result) {
+            document.getElementById('ai-result').textContent = 'GPT Analysis: ' + data.result;
+        } else {
+            document.getElementById('ai-result').textContent = 'Error: ' + data.error;
+        }
     })
     .catch(error => {
-        console.error('Error:', error);
+        console.error('Error analyzing OCR result:', error);
         document.getElementById('ai-result').textContent = 'Error analyzing the result';
     });
 }
+
+// Trigger the GPT analysis when the "Analyze" button is clicked
+document.getElementById('analyze-btn').onclick = analyzeOCRResult;
+
 
 // Trigger the OCR process when the user clicks the "Start Scanning" button
 document.getElementById('start-btn').onclick = doOCR;
 
 // Trigger the GPT analysis when the "Analyze" button is clicked
-document.getElementById('analyze-btn').onclick = analyzeOCRResult;
+//document.getElementById('analyze-btn').onclick = analyzeOCRResult;
