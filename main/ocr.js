@@ -12,34 +12,37 @@ function preprocessImage(file, callback) {
             let width = img.width;
             let height = img.height;
 
+            // Adjust image dimensions while maintaining aspect ratio
             if (width > maxWidth || height > maxHeight) {
-                if (width > height) {
-                    height = Math.round((height *= maxWidth / width));
-                    width = maxWidth;
-                } else {
-                    width = Math.round((width *= maxHeight / height));
-                    height = maxHeight;
-                }
+                const scaleFactor = Math.min(maxWidth / width, maxHeight / height);
+                width = Math.round(width * scaleFactor);
+                height = Math.round(height * scaleFactor);
             }
 
+            // Set the canvas to the new size
             canvas.width = width;
             canvas.height = height;
+
+            // Draw the resized image on the canvas
             ctx.drawImage(img, 0, 0, width, height);
 
-            // Convert to grayscale
+            // Convert image to grayscale
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imageData.data;
+
+            // Grayscale conversion
             for (let i = 0; i < data.length; i += 4) {
                 const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                const binaryValue = avg > 128 ? 255 : 0; // Thresholding for binarization
-                data[i] = binaryValue;
-                data[i + 1] = binaryValue;
-                data[i + 2] = binaryValue;
+                data[i] = avg;
+                data[i + 1] = avg;
+                data[i + 2] = avg;
             }
             ctx.putImageData(imageData, 0, 0);
 
+            // Pass the preprocessed image back to the callback
             callback(canvas.toDataURL());
         };
+
         img.src = e.target.result;
     };
 
@@ -47,18 +50,14 @@ function preprocessImage(file, callback) {
 }
 
 function extractItemsFromReceipt(text) {
-    const itemPattern = /([a-zA-Z0-9\s]+)\s+(\d+\.\d{2})/g;  // Adjusted pattern for item names and prices
-    const weighedItemPattern = /([a-zA-Z0-9\s]+)\s+(\d+\.\d{2})\/lb\s+(\d+\.\d{2})/g; // Pattern for weighed items
+    // Improved regex to capture items and prices more reliably
+    const itemPattern = /([a-zA-Z\s]+)\s+(\d+\.\d{2})/g;
     const matches = [];
-
     let match;
-    // Extract regular items
+
+    // Use regex to find item and price pairs
     while ((match = itemPattern.exec(text)) !== null) {
         matches.push({ item: match[1].trim(), price: match[2] });
-    }
-    // Extract weighed items
-    while ((match = weighedItemPattern.exec(text)) !== null) {
-        matches.push({ item: match[1].trim(), price: match[3] });
     }
 
     return matches;
@@ -69,9 +68,12 @@ function doOCR() {
     const result = document.getElementById('result');
     const loadingMessage = document.getElementById('loading');
 
+    // Clear previous results and show the loading message
     result.textContent = '';
+    loadingMessage.textContent = '0% completed...'; // Initialize loading message
     loadingMessage.style.display = 'block';
 
+    // Check if a file is selected
     if (!fileInput) {
         result.textContent = 'Please select an image first!';
         loadingMessage.style.display = 'none';
@@ -79,17 +81,22 @@ function doOCR() {
     }
 
     preprocessImage(fileInput, function(preprocessedImage) {
-        console.log('Preprocessed Image:', preprocessedImage);
-
+        // Use Tesseract.js to recognize text from the preprocessed image
         Tesseract.recognize(preprocessedImage, 'eng', {
             logger: m => {
-                console.log(m);
                 if (m.status === 'recognizing text') {
-                    loadingMessage.textContent = `Progress: ${(m.progress * 100).toFixed(2)}%`;
+                    const progress = Math.round(m.progress * 100); // Calculate percentage
+                    loadingMessage.textContent = `${progress}% completed...`; // Update loading message
                 }
+                console.log(m);
             }
         }).then(({ data: { text } }) => {
-            const items = extractItemsFromReceipt(text);
+            console.log('OCR Result:', text);
+            result.textContent = text;  // Display the OCR result on the webpage
+
+            const items = extractItemsFromReceipt(text);  // Extract structured items
+
+            // Check if any items were found and display them
             if (items.length > 0) {
                 result.innerHTML = `<p>OCR Extracted Items:</p><ul>`;
                 items.forEach(item => {
@@ -100,12 +107,17 @@ function doOCR() {
                 result.innerHTML = `<p>No items found.</p>`;
             }
         }).catch(err => {
+            // Handle any errors during the OCR process
             console.error("OCR Error:", err);
             result.textContent = 'Error during OCR process.';
         }).finally(() => {
+            // Hide the loading message after OCR is complete
             loadingMessage.style.display = 'none';
         });
     });
 }
 
+// Trigger the OCR process when the user clicks the "Start Scanning" button
 document.getElementById('start-btn').onclick = doOCR;
+
+

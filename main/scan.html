@@ -11,19 +11,6 @@
             margin: 0;
             padding: 0;
             background-color: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh; /* Make sure the content is vertically centered */
-        }
-        .container {
-            text-align: center;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            width: 100%;
         }
         header {
             background-color: #333;
@@ -42,6 +29,28 @@
             text-decoration: none;
             margin: 0 15px;
         }
+        main {
+            padding: 20px;
+            text-align: center;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        .container {
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 20px auto;
+        }
         input, button {
             display: block;
             margin: 20px auto;
@@ -55,31 +64,64 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <header>
         <h1>Scan your receipt</h1>
-        <nav>
-            <a href="main.html">Home</a>
-            <a href="scan.html">Scan</a> <!-- Added link to the scan page -->
-            <a href="about.html">About</a>
-            <a href="#">Services</a>
-            <a href="#">Contact</a>
-        </nav>
+    </header>
+    <nav>
+        <a href="main.html">Home</a>
+        <a href="scan.html">Scan</a>
+        <a href="about.html">About</a>
+        <a href="#">Services</a>
+        <a href="#">Contact</a>
+    </nav>
+    <main>
+        <div class="container">
+            <!-- Image Upload Form -->
+            <input type="file" id="imageInput" accept="image/*">
+            <button id="start-btn">Start Scanning</button>
 
-        <!-- Image Upload Form -->
-        <input type="file" id="imageInput" accept="image/*">
-        <button id="start-btn">Start Scanning</button>
+            <!-- Display preprocessed image and result -->
+            <canvas id="canvas"></canvas>
+            <p id="result">OCR Result will appear here...</p>
+            <p id="loading">Processing, please wait...</p>
 
-        <!-- Display preprocessed image and result -->
-        <canvas id="canvas"></canvas>
-        <p id="result">OCR Result will appear here...</p>
-        <p id="loading">Processing, please wait...</p>
-    </div>
+            <button id="analyze-btn" style="display:none;">Analyze Item with AI</button>
+            <p id="ai-result"></p>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2024 Your Company. All rights reserved.</p>
+    </footer>
 
     <!-- Import Tesseract.js via CDN -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.4/dist/tesseract.min.js"></script>
     <!-- Link to External JavaScript File -->
     <script src="ocr.js"></script>
+    <script>
+        document.getElementById('start-btn').onclick = function () {
+            // Perform OCR and display the result (already handled in ocr.js)
+        };
+
+        document.getElementById('analyze-btn').onclick = function () {
+            const item = document.getElementById('result').textContent;
+            if (item) {
+                fetch('/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ item: item }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('ai-result').textContent = 'AI Analysis: ' + data.result;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('ai-result').textContent = 'Error analyzing item';
+                });
+            }
+        };
+    </script>
 </body>
 </html>
-
-
