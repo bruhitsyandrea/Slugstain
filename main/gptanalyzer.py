@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 import openai
 import os
-
+file_path = 'message.txt'
 app = Flask(__name__)
 
 client = openai.OpenAI(
@@ -9,6 +9,9 @@ client = openai.OpenAI(
 )
 
 
+
+with open(file_path, 'r') as file:
+    stringg = file.read()
 # Route to serve the home page
 @app.route('/')
 def home():
@@ -18,7 +21,7 @@ def home():
 @app.route('/scan')
 def scan():
     return render_template('scan.html')  # Renders the scan.html from the templates folder
-
+s
 # Route to serve the about page
 @app.route('/about')
 def about():
@@ -27,6 +30,7 @@ def about():
 # Route to handle AI analysis
 @app.route('/analyze', methods=['POST'])
 def analyze_item():
+
     try:
         data = request.json
         item = data.get('item', '')
@@ -36,7 +40,7 @@ def analyze_item():
 
         # Debugging: Log received text
         print(f"Text received for analysis: {item}")
-
+        item = stringg
         # Send the text to GPT using the new SDK method
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
