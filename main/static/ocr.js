@@ -67,6 +67,7 @@ function doOCR() {
     const fileInput = document.getElementById('imageInput').files[0];
     const result = document.getElementById('result');
     const loadingMessage = document.getElementById('loading');
+    const analyzeBtn = document.getElementById('analyze-btn');
 
     // Clear previous results and show the loading message
     result.textContent = '';
@@ -106,6 +107,10 @@ function doOCR() {
             } else {
                 result.innerHTML = `<p>No items found.</p>`;
             }
+
+            // Show the "Analyze" button once OCR is done
+            analyzeBtn.style.display = 'block';
+
         }).catch(err => {
             // Handle any errors during the OCR process
             console.error("OCR Error:", err);
@@ -117,7 +122,35 @@ function doOCR() {
     });
 }
 
+// Function to send the OCR result to the Flask backend for GPT analysis
+function analyzeOCRResult() {
+    const item = document.getElementById('result').textContent;
+
+    if (!item) {
+        console.error("No OCR result to analyze.");
+        return;
+    }
+
+    fetch('/analyze', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ item: item }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Display the GPT analysis result
+        document.getElementById('ai-result').textContent = 'GPT Analysis: ' + data.result;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('ai-result').textContent = 'Error analyzing the result';
+    });
+}
+
 // Trigger the OCR process when the user clicks the "Start Scanning" button
 document.getElementById('start-btn').onclick = doOCR;
 
-
+// Trigger the GPT analysis when the "Analyze" button is clicked
+document.getElementById('analyze-btn').onclick = analyzeOCRResult;

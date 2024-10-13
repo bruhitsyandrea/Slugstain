@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Scan Page</title>
+    <title>Scan and Analyze</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -55,7 +54,7 @@
             display: block;
             margin: 20px auto;
         }
-        #result, #loading {
+        #result, #loading, #ai-result {
             margin-top: 20px;
         }
         canvas {
@@ -68,11 +67,9 @@
         <h1>Scan your receipt</h1>
     </header>
     <nav>
-        <a href="main.html">Home</a>
-        <a href="scan.html">Scan</a>
-        <a href="about.html">About</a>
-        <a href="#">Services</a>
-        <a href="#">Contact</a>
+        <a href="/">Home</a>
+        <a href="/scan">Scan</a>
+        <a href="/about">About</a>
     </nav>
     <main>
         <div class="container">
@@ -83,10 +80,11 @@
             <!-- Display preprocessed image and result -->
             <canvas id="canvas"></canvas>
             <p id="result">OCR Result will appear here...</p>
-            <p id="loading">Processing, please wait...</p>
+            <p id="loading" style="display: none;">Processing, please wait...</p>
 
+            <!-- Button to analyze OCR result with GPT -->
             <button id="analyze-btn" style="display:none;">Analyze Item with AI</button>
-            <p id="ai-result"></p>
+            <p id="ai-result">AI Analysis result will appear here...</p>
         </div>
     </main>
     <footer>
@@ -95,33 +93,7 @@
 
     <!-- Import Tesseract.js via CDN -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.4/dist/tesseract.min.js"></script>
-    <!-- Link to External JavaScript File -->
-    <script src="ocr.js"></script>
-    <script>
-        document.getElementById('start-btn').onclick = function () {
-            // Perform OCR and display the result (already handled in ocr.js)
-        };
-
-        document.getElementById('analyze-btn').onclick = function () {
-            const item = document.getElementById('result').textContent;
-            if (item) {
-                fetch('/analyze', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ item: item }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('ai-result').textContent = 'AI Analysis: ' + data.result;
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.getElementById('ai-result').textContent = 'Error analyzing item';
-                });
-            }
-        };
-    </script>
+    <!-- Link to External JavaScript File (ocr.js) -->
+    <script src="{{ url_for('static', filename='ocr.js') }}"></script>
 </body>
 </html>
